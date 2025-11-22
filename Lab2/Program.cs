@@ -1,4 +1,6 @@
-﻿using System;
+﻿//zadanie 2
+
+using System;
 
 Car car1 = new Car(model: "Audi", year: 2023);
 Car car2 = new Car(model: "VW", year: 1998);
