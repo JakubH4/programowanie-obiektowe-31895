@@ -4,13 +4,10 @@ using System.Text.Json;
 using System.IO;
 using System.Linq;
 
-// 1. Poprawiony Namespace zgodnie z Twoim projektem
 namespace Incident_Check_Beta
 {
-    // 4. Wszystkie filary obiektowości
     public abstract class IncydentBazowy
     {
-        // 4c. Hermetyzacja i rozwiązanie problemu "Non-nullable" (inicjalizacja = "")
         public string Tytul { get; set; } = "";
         public DateTime Data { get; set; }
         
@@ -30,7 +27,6 @@ namespace Incident_Check_Beta
 
     public class IncydentSieciowy : Incydent
     {
-        // Poprawka nazewnictwa na AdresIp (zgodnie z sugestią IDE)
         public string AdresIp { get; set; } = "";
 
         public override void WyswietlPodsumowanie()
@@ -41,11 +37,11 @@ namespace Incident_Check_Beta
 
     class Program
     {
-        // Sugestia nazw dla pól statycznych: dodanie '_' na początku
+        
         private static List<Incydent> _bazaDanych = new List<Incydent>();
         private static readonly string _nazwaPliku = "incydenty.json";
 
-        static void Main() // Usunięto nieużywane 'args'
+        static void Main() 
         {
             WczytajZPliku();
 
@@ -73,8 +69,16 @@ namespace Incident_Check_Beta
         {
             Console.Write("Tytuł: "); string t = Console.ReadLine() ?? "";
             Console.Write("Opis: "); string o = Console.ReadLine() ?? "";
+    
             
             string p = t.ToLower().Contains("ransomware") ? "KRYTYCZNY" : "Normalny";
+
+            if (p != "KRYTYCZNY")
+            {
+                Console.Write("Czy nadać priorytet KRYTYCZNY? (t/n): ");
+                string odp = Console.ReadLine()?.ToLower() ?? "";
+                if (odp == "t") p = "KRYTYCZNY";
+            }
 
             if (czySieciowy)
             {
@@ -85,6 +89,9 @@ namespace Incident_Check_Beta
             {
                 _bazaDanych.Add(new Incydent { Tytul = t, Opis = o, Priorytet = p, Data = DateTime.Now });
             }
+    
+            Console.WriteLine($"\nDodano incydent z priorytetem: {p}");
+            Console.ReadLine();
         }
 
         static void Wyswietl(List<Incydent> lista)
@@ -111,7 +118,6 @@ namespace Incident_Check_Beta
             if (File.Exists(_nazwaPliku))
             {
                 string json = File.ReadAllText(_nazwaPliku);
-                // Obsługa potencjalnego null przy deserializacji
                 var dane = JsonSerializer.Deserialize<List<Incydent>>(json);
                 if (dane != null) _bazaDanych = dane;
             }
