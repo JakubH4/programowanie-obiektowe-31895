@@ -2,24 +2,17 @@
 using System.Collections.Generic;
 using System.Text.Json;
 using System.IO;
-using System.Linq;
 
 namespace Incident_Check_Beta
 {
-    public abstract class IncydentBazowy
+    public class Incydent
     {
         public string Tytul { get; set; } = "";
-        public DateTime Data { get; set; }
-        
-        public abstract void WyswietlPodsumowanie();
-    }
-
-    public class Incydent : IncydentBazowy
-    {
         public string Opis { get; set; } = "";
         public string Priorytet { get; set; } = "";
+        public DateTime Data { get; set; }
 
-        public override void WyswietlPodsumowanie()
+        public virtual void WyswietlPodsumowanie()
         {
             Console.WriteLine($"[{Data}] {Priorytet} | {Tytul}: {Opis}");
         }
@@ -37,31 +30,28 @@ namespace Incident_Check_Beta
 
     class Program
     {
-        
         private static List<Incydent> _bazaDanych = new List<Incydent>();
         private static readonly string _nazwaPliku = "incydenty.json";
 
-        static void Main() 
+        static void Main()
         {
             WczytajZPliku();
 
             while (true)
             {
                 Console.Clear();
-                Console.WriteLine("=== CYBER-INCIDENT TRACKER ===");
-                Console.WriteLine("1. Zgłoś incydent ogólny");
-                Console.WriteLine("2. Zgłoś incydent sieciowy");
-                Console.WriteLine("3. Wyświetl wszystkie");
-                Console.WriteLine("4. Pokaż tylko KRYTYCZNE (LINQ)");
-                Console.WriteLine("5. Zapisz i Wyjdź");
-                Console.Write("\nWybierz: ");
+                Console.WriteLine("=== SYSTEM ZGŁOSZEŃ ===");
+                Console.WriteLine("1. Nowy incydent");
+                Console.WriteLine("2. Nowy incydent sieciowy");
+                Console.WriteLine("3. Wyświetl wszystko");
+                Console.WriteLine("4. Zapisz i Wyjdź");
+                Console.Write("\nWybór: ");
 
                 string? wybor = Console.ReadLine();
                 if (wybor == "1") Dodaj(false);
                 else if (wybor == "2") Dodaj(true);
-                else if (wybor == "3") Wyswietl(_bazaDanych);
-                else if (wybor == "4") FiltrujKrytyczne();
-                else if (wybor == "5") { Zapisz(); break; }
+                else if (wybor == "3") Wyswietl();
+                else if (wybor == "4") { Zapisz(); break; }
             }
         }
 
@@ -69,16 +59,7 @@ namespace Incident_Check_Beta
         {
             Console.Write("Tytuł: "); string t = Console.ReadLine() ?? "";
             Console.Write("Opis: "); string o = Console.ReadLine() ?? "";
-    
-            
-            string p = t.ToLower().Contains("ransomware") ? "KRYTYCZNY" : "Normalny";
-
-            if (p != "KRYTYCZNY")
-            {
-                Console.Write("Czy nadać priorytet KRYTYCZNY? (t/n): ");
-                string odp = Console.ReadLine()?.ToLower() ?? "";
-                if (odp == "t") p = "KRYTYCZNY";
-            }
+            Console.Write("Priorytet: "); string p = Console.ReadLine() ?? "";
 
             if (czySieciowy)
             {
@@ -89,22 +70,17 @@ namespace Incident_Check_Beta
             {
                 _bazaDanych.Add(new Incydent { Tytul = t, Opis = o, Priorytet = p, Data = DateTime.Now });
             }
-    
-            Console.WriteLine($"\nDodano incydent z priorytetem: {p}");
+        }
+
+        static void Wyswietl()
+        {
+            Console.WriteLine("\n--- LISTA ---");
+            foreach (var i in _bazaDanych)
+            {
+                i.WyswietlPodsumowanie();
+            }
+            Console.WriteLine("\nNaciśnij Enter...");
             Console.ReadLine();
-        }
-
-        static void Wyswietl(List<Incydent> lista)
-        {
-            Console.WriteLine("\n--- RAPORT ---");
-            foreach (var i in lista) i.WyswietlPodsumowanie();
-            Console.WriteLine("\nKliknij Enter..."); Console.ReadLine();
-        }
-
-        static void FiltrujKrytyczne()
-        {
-            var krytyczne = _bazaDanych.Where(x => x.Priorytet == "KRYTYCZNY").ToList();
-            Wyswietl(krytyczne);
         }
 
         static void Zapisz()
